@@ -1,50 +1,11 @@
-# Welcome to your Expo app 👋
+# Sadaaf Arabic Dictionary Mobile App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## About
 
-## Get started
+One of the more difficult tasks for beginner and intermediate students of Arabic is dictionary usage.
 
-1. Install dependencies
+Dictionary lookups can take minutes. Classical Arabic dictionaries are formatted not in an alphabetical order, but an order primarily dependent on word root.
 
-   ```bash
-   npm install
-   ```
+Arabic word formation mostly relies on derivations from a triliteral or quadriliteral consonantal root. That means the word of the verb /kataba/ 'to write' is [k, t, b]. This system forms the basis for many other words, like /maktab/ "office, desk", /kaatib/ "writer", and innumerable more.
 
-2. Start the app
-
-   ```bash
-    npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+This application attempts to break down the barrier to entry for modern students. While physical dictionary lookups can be rewarding, if we are practicing intensive reading, sometimes we just want to get the definition immediately.
