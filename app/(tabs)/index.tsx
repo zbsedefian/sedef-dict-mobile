@@ -1,13 +1,13 @@
-import { Image, StyleSheet, Platform, ActivityIndicator, TextInput, StatusBar, TouchableOpacity, Text, Alert } from 'react-native';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { useState } from 'react';
-import axios from 'axios';
+import { StyleSheet, ActivityIndicator, TextInput, StatusBar, TouchableOpacity, Text, Alert, View, FlatList } from 'react-native';
+import React, { useState } from 'react';
+import axios, { AxiosError, AxiosResponse } from 'axios';
+import Ionicons from 'react-native-vector-icons/Ionicons'; // Import Ionicons from vector icons
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
   const [inputValue, setInputValue] = useState('');
-  const [data, setData] = useState(null); // State to store the fetched data
+  const [wordList, setWordList] = useState(null); // State to store the fetched data
+  const [translation, setTranslation] = useState(null); // State to store the fetched data
   const [loading, setLoading] = useState(false); // State to manage loading indicator
 
   const handleSearch = async () => {
@@ -18,110 +18,108 @@ export default function HomeScreen() {
 
     setLoading(true);
     try {
-      const response = await axios.post(
-        "http://192.168.4.30:8000/lookup",
-        { word: inputValue }
+      const response: AxiosResponse = await axios.post(
+        'http://192.168.4.30:8000/lookup/sentence/async',
+        { input: inputValue }
       );
-      setData(response.data);
-    } catch (error) {
-      console.error('Error:', error);
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+
+      setTranslation(response.data.translation);
+
+      // Extract the "word" field from each item in the response
+      const extractedData = response.data.words.map((item) => ({
+        word: item.word,
+        lemma: item.lemma,
+        englishMeaning: item.english_meaning,
+        pos: item.pos,
+        baseMeaning: item.base_meaning,
+      }));
+
+      setWordList(extractedData);
+    } catch (error: AxiosError | any) {
+      if (error.response) {
+        if (error.response.status === 400) {
+          Alert.alert('Error 400', 'Bad Request. Input one Arabic word.');
+        } else {
+          Alert.alert(`Error ${error.response.status}`, error.response.data?.message || 'Something went wrong');
+        }
+      } else if (error.request) {
+        console.log(error)
+        Alert.alert('Network Error', 'No response received from the server.');
+      } else {
+        Alert.alert('Error', error.message);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.container}>
-        <StatusBar barStyle="dark-content" />
-        <ThemedView style={styles.inputBar}>
-          <TextInput
-            style={styles.input}
-            placeholder="Search or type something..."
-            value={inputValue}
-            onChangeText={(text) => setInputValue(text)}
-            onSubmitEditing={handleSearch} // Trigger search on "Enter" key
-          />
-          <TouchableOpacity style={styles.button} onPress={handleSearch}>
-            <Text style={styles.buttonText}>Enter</Text>
-          </TouchableOpacity>
-        </ThemedView>
+  const handleClear = () => {
+    setInputValue('');
+  };
 
-        {loading ? (
-          <ThemedView style={styles.center}>
-            <ActivityIndicator size="large" color="#0000ff" />
-          </ThemedView>
-        ) : data ? (
-          <ThemedView style={styles.stepContainer}>
-            <ThemedText type="subtitle">{data.word}</ThemedText>
-            <ThemedText>{data.english_meaning} </ThemedText>
-            <ThemedText>{data.attributes.verb.tense} {data.attributes.verb.mood}</ThemedText>
-            <ThemedText>Form {data.attributes.verb.verb_form ?? 'I'}</ThemedText>
-            <ThemedText>
-              {data.attributes.verb.related_forms.past} | {data.attributes.verb.related_forms.present} | {data.attributes.verb.related_forms.masdar}
-            </ThemedText>
-            <ThemedText>{data.base_meaning} {data.pos}</ThemedText>
-            <ThemedText>{data.attributes.verb.tense} {data.attributes.verb.mood}</ThemedText>
-            <ThemedText>Subject: {data.attributes.verb.declined_subject}</ThemedText>
-          </ThemedView>
-        ) : null}
-      </ThemedView>
-    </ParallaxScrollView>
+  const renderItem = ({ item }) => (
+    <View style={styles.itemContainer}>
+      <Text style={styles.wordText}>{item.word} - {item.englishMeaning}</Text>
+      {item.word !== item.lemma || item.englishMeaning !== item.baseMeaning ? <Text style={styles.meaningText}>{item.lemma} - {item.baseMeaning}</Text> : <></>}
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <View style={styles.searchBarContainer}>
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Search or type something..."
+          textAlign="right" // Right-align the input text
+          value={inputValue}
+          onChangeText={(text) => setInputValue(text)}
+          onSubmitEditing={handleSearch} // Trigger search on "Enter" key
+        />
+        {inputValue.length > 0 && (
+          <TouchableOpacity onPress={handleClear} style={styles.clearButton}>
+            <Ionicons name="close-circle" size={24} color="#888" />
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity style={styles.button} onPress={handleSearch}>
+          <Text style={styles.buttonText}>Enter</Text>
+        </TouchableOpacity>
+      </View>
+      {loading ? (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      ) : wordList ? (
+        <View style={styles.stepContainer}>
+          <Text>{translation}</Text>
+          <FlatList
+            data={wordList}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={renderItem}
+            contentContainerStyle={{ paddingBottom: 20 }} // Optional padding at the bottom
+          />
+        </View>
+      ) : null}
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   container: {
     flex: 1,
     backgroundColor: '#f8f8f8',
+    paddingTop: 30,
   },
-  inputBar: {
-    height: 50,
-    paddingHorizontal: 10,
+  searchBarContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    marginTop: StatusBar.currentHeight || 0,
-  },
-  input: {
-    flex: 1,
-    height: 40,
-    borderRadius: 5,
     paddingHorizontal: 10,
-    backgroundColor: '#f0f0f0',
-    marginRight: 10,
+    paddingVertical: 5,
+  },
+  stepContainer: {
+    flex: 1, // Make the step container fill available space
+    paddingHorizontal: 10,
+    paddingVertical: 10,
   },
   button: {
     height: 40,
@@ -131,8 +129,33 @@ const styles = StyleSheet.create({
     backgroundColor: '#007bff',
     borderRadius: 5,
   },
-  buttonText: {
-    color: '#ffffff',
-    fontWeight: 'bold',
+  searchBar: {
+    flex: 1,
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    marginRight: 10,
+    backgroundColor: '#fff',
+  },
+  wordText: {
+    fontSize: 18,
+    color: '#333',
+    textAlign: 'right',
+  },
+  meaningText: {
+    fontSize: 14,
+    color: '#444',
+    textAlign: 'right',
+  },
+  itemContainer: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  clearButton: {
+    position: 'absolute',
+    left: 15,
   },
 });
