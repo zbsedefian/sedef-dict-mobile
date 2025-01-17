@@ -1,4 +1,4 @@
-import { Attributes } from "react"
+import { Attributes } from "./Attribute"
 
 export interface DictionaryResponse {
     word: string
@@ -7,5 +7,6 @@ export interface DictionaryResponse {
     lemma: string
     english_meaning: string
     base_meaning: string
+    transliteration: string
     attributes: Attributes
 }

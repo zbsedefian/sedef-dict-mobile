@@ -8,7 +8,7 @@ export interface NounAttributes {
     root?: string;
     object_enclitic?: string;
 }
-  
+
 export interface VerbAttributes {
     root?: string;
     conjugation_pattern?: string;
@@ -59,11 +59,13 @@ export interface ParticleAttributes {
     usage_examples?: string[];
 }
 
-type Attributes =
-| { noun: NounAttributes }
-| { verb: VerbAttributes }
-| { adjective: AdjectiveAttributes }
-| { pronoun: PronounAttributes }
-| { adverb: AdverbAttributes }
-| { preposition: PrepositionAttributes }
-| { particle: ParticleAttributes };
+export interface Attributes {
+    type?: string;
+    noun?: NounAttributes;
+    verb?: VerbAttributes;
+    adjective?: AdjectiveAttributes;
+    pronoun?: PronounAttributes;
+    adverb?: AdverbAttributes;
+    preposition?: PrepositionAttributes;
+    particle?: ParticleAttributes;
+}
